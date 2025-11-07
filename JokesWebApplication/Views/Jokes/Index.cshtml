@@ -29,7 +29,7 @@
                 @Html.DisplayFor(modelItem => item.JokeQuestion)
             </td>
             <td>
-              @item.User.UserName      
+                    @(item.User?.Email ?? "Unknown")
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

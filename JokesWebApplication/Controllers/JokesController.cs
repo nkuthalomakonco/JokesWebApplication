@@ -42,6 +42,7 @@ namespace JokesWebApplication.Controllers
         public async Task<IActionResult> ShowSearchResults(string SeacrhPhrase)
         {
             return View("Index", await _context.Joke.Where(j => j.JokeQuestion.Contains(SeacrhPhrase)).ToListAsync());
+            //@item.User?.UserName ?? "Unknown"
         }
 
         // GET: Jokes/Details/5
