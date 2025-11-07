@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using JokesWebApplication.Data;
 using JokesWebApplication.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 
 namespace JokesWebApplication.Controllers
 {
@@ -15,15 +16,22 @@ namespace JokesWebApplication.Controllers
     {
         private readonly ApplicationDbContext _context;
 
-        public JokesController(ApplicationDbContext context)
+        private readonly UserManager<IdentityUser> _userManager;
+
+        public JokesController(ApplicationDbContext context, UserManager<IdentityUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Jokes
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Joke.ToListAsync());
+            //return View(await _context.Joke.ToListAsync());
+
+            // Include the User navigation property
+            var jokes = await _context.Joke.Include(j => j.User).ToListAsync();
+            return View(jokes);
         }
         //GET: Jokes/ShowSearchForm
         public async Task<IActionResult> ShowSearchForm()
@@ -71,6 +79,10 @@ namespace JokesWebApplication.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Assign the logged-in user
+                var user = await _userManager.GetUserAsync(User);
+                joke.UserId = user?.Id ?? "";
+
                 _context.Add(joke);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -112,7 +124,17 @@ namespace JokesWebApplication.Controllers
             {
                 try
                 {
-                    _context.Update(joke);
+                    // Load the existing joke including the UserId
+                    var existingJoke = await _context.Joke.FindAsync(id);
+                    if (existingJoke == null)
+                    {
+                        return NotFound();
+                    }
+
+                    // Update only the question and answer
+                    existingJoke.JokeQuestion = joke.JokeQuestion;
+                    existingJoke.JokeAnswer = joke.JokeAnswer;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -130,6 +152,7 @@ namespace JokesWebApplication.Controllers
             }
             return View(joke);
         }
+
 
         // GET: Jokes/Delete/5
         [Authorize]

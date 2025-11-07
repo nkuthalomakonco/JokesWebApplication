@@ -16,7 +16,8 @@
                 @Html.DisplayNameFor(model => model.JokeQuestion)
             </th>
             <th>
-                
+                @* @Html.DisplayNameFor(model => model.User) *@
+                Created By
             </th>
             <th></th>
         </tr>
@@ -28,7 +29,7 @@
                 @Html.DisplayFor(modelItem => item.JokeQuestion)
             </td>
             <td>
-                
+              @item.User.UserName      
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
